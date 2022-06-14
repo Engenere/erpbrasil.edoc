@@ -11,6 +11,9 @@ from erpbrasil.assinatura.assinatura import Assinatura
 from lxml import etree
 from lxml.etree import _Element
 
+from xsdata.formats.dataclass.serializers import XmlSerializer
+from xsdata.formats.dataclass.serializers.config import SerializerConfig
+
 from .resposta import analisar_retorno_raw
 
 # Fix Python 2.x.
@@ -44,29 +47,11 @@ class DocumentoEletronico(ABC):
             return etree.tostring(ds), ds
         if isinstance(ds, str):
             return ds, etree.fromstring(ds)
-        # if isinstance(ds, unicode):
-        #     return ds, etree.fromstring(ds)
-
-        output = StringIO()
-        namespace = False
-        if self._namespace:
-            namespace = 'xmlns="' + self._namespace + '"'
-
-        if namespace:
-            ds.export(
-                output,
-                0,
-                pretty_print=pretty_print,
-                namespacedef_=namespace
-            )
-        else:
-            ds.export(
-                output,
-                0,
-                pretty_print=pretty_print,
-            )
-        contents = output.getvalue()
-        output.close()
+        serializer = XmlSerializer(config=SerializerConfig(pretty_print=pretty_print))
+        xml = serializer.render(
+            obj=ds, ns_map={None: self._namespace}
+        )
+        contents = xml.encode()
         return contents, etree.fromstring(contents)
 
     def _post(self, raiz, url, operacao, classe):

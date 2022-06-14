@@ -5,6 +5,9 @@
 import re
 
 from lxml import etree
+from xsdata.formats.dataclass.context import XmlContext
+from xsdata.formats.dataclass.parsers import XmlParser
+
 
 
 class RetornoSoap(object):
@@ -25,9 +28,10 @@ def analisar_retorno_raw(operacao, raiz, xml, retorno, classe):
         xml_resposta = match.group(1)
         resultado = etree.tostring(etree.fromstring(xml_resposta)[0])
         classe.Validate_simpletypes_ = False
-        resposta = classe.parseString(resultado, silence=True)
+        parser = XmlParser(context=XmlContext())
+        resposta = parser.from_bytes(resultado, classe)
+        # resposta = classe.parseString(resultado, silence=True)
         return RetornoSoap(operacao, raiz, xml, retorno, resposta)
-
 
 def analisar_retorno(operacao, raiz, xml, retorno, classe):
     resposta = False

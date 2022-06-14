@@ -13,33 +13,30 @@ from lxml import etree
 
 from erpbrasil.edoc.edoc import DocumentoEletronico
 
-try:
-    # nfelib imports
-    # xsd NFe
-    from nfelib.v4_00 import retInutNFe
-    from nfelib.v4_00 import retConsStatServ
-    from nfelib.v4_00 import retConsSitNFe
-    from nfelib.v4_00 import retEnviNFe
-    from nfelib.v4_00 import retConsReciNFe
+    #from nfelib.v4_00 import retInutNFe
+from nfelib.nfe.v4_0.ret_cons_stat_serv_v4_00 import RetConsStatServ
+from nfelib.nfe.v4_0.leiaute_cons_stat_serv_v4_00 import TconsStatServ
+from nfelib.nfe.v4_0.leiaute_cons_stat_serv_v4_00 import TconsStatServXServ
+     #from nfelib.v4_00 import retConsSitNFe
+     #from nfelib.v4_00 import retEnviNFe
+     #from nfelib.v4_00 import retConsReciNFe
 
     # xsd Distribuiçao NFe
-    from nfelib.v4_00 import distDFeInt
-    from nfelib.v4_00 import retDistDFeInt
+     #from nfelib.v4_00 import distDFeInt
+     #from nfelib.v4_00 import retDistDFeInt
 
     # xsd Evento Generico
-    from nfelib.v4_00 import retEnvEvento
+    #from nfelib.v4_00 import retEnvEvento
 
     # xsd Evento Cancelamento
-    from nfelib.v4_00 import retEnvEventoCancNFe
+
+    #from nfelib.v4_00 import retEnvEventoCancNFe
 
     # xsd CCe
-    from nfelib.v4_00 import retEnvCCe
+    #from nfelib.v4_00 import retEnvCCe
 
     # xsd Consulta Cadastro
-    from nfelib.v4_00 import retConsCad
-
-except ImportError:
-    pass
+    #from nfelib.v4_00 import retConsCad
 
 
 TEXTO_CARTA_CORRECAO = """A Carta de Correcao e disciplinada pelo paragrafo \
@@ -741,7 +738,7 @@ class NFe(DocumentoEletronico):
         self.mod = str(mod)
 
     def _edoc_situacao_ja_enviado(self, proc_consulta):
-        if proc_consulta.resposta.cStat in ('100', '110', '150', '301', '302'):
+        if proc_consulta.resposta.c_stat in ('100', '110', '150', '301', '302'):
             return True
         return False
 
@@ -749,11 +746,11 @@ class NFe(DocumentoEletronico):
         return edoc.infNFe.Id[:3], edoc.infNFe.Id[3:]
 
     def status_servico(self):
-        raiz = retConsStatServ.TConsStatServ(
+        raiz = TconsStatServ(
             versao=self.versao,
-            tpAmb=self.ambiente,
-            cUF=self.uf,
-            xServ='STATUS',
+            tp_amb=self.ambiente,
+            c_uf=self.uf,
+            x_serv=TconsStatServXServ.STATUS,
         )
         raiz.original_tagname_ = 'consStatServ'
         return self._post(
@@ -762,7 +759,7 @@ class NFe(DocumentoEletronico):
             localizar_url(WS_NFE_SITUACAO, str(self.uf), self.mod,
                           int(self.ambiente)),
             'nfeStatusServicoNF',
-            retConsStatServ
+            RetConsStatServ
         )
 
     def consulta_documento(self, chave):
@@ -953,17 +950,17 @@ class NFe(DocumentoEletronico):
         return raiz
 
     def _verifica_servico_em_operacao(self, proc_servico):
-        if proc_servico.resposta.cStat == self._edoc_situacao_servico_em_operacao:
+        if proc_servico.resposta.c_stat == self._edoc_situacao_servico_em_operacao:
             return True
         return False
 
     def _verifica_documento_ja_enviado(self, proc_consulta):
-        if proc_consulta.resposta.cStat in ('100', '110', '150', '301', '302'):
+        if proc_consulta.resposta.c_stat in ('100', '110', '150', '301', '302'):
             return True
         return False
 
     def _verifica_resposta_envio_sucesso(self, proc_envio):
-        if proc_envio.resposta.cStat == \
+        if proc_envio.resposta.c_stat == \
                 self._edoc_situacao_arquivo_recebido_com_sucesso:
             return True
         return False
@@ -972,7 +969,7 @@ class NFe(DocumentoEletronico):
         time.sleep(float(proc_envio.resposta.infRec.tMed) * 1.3)
 
     def _edoc_situacao_em_processamento(self, proc_recibo):
-        if proc_recibo.resposta.cStat == '105':
+        if proc_recibo.resposta.c_stat == '105':
             return True
         return False
 
