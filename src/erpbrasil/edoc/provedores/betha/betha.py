@@ -8,6 +8,7 @@ from erpbrasil.edoc.nfse import NFSe
 from erpbrasil.edoc.nfse import ServicoNFSe
 from erpbrasil.edoc.resposta import RetornoSoap
 import signxml
+from urllib.parse import urljoin
 
 from xsdata.formats.dataclass.transports import DefaultTransport
 from xsdata.formats.dataclass.parsers import XmlParser
@@ -29,24 +30,19 @@ from .generated_wsdl.consultar_nfse_por_rps import (
     TcIdentificacaoPrestador
 )
 
-
 # Definição dos serviços (WSDL)
+HOMO_BASE_URL = "https://e-gov.betha.com.br/e-nota-contribuinte-test-ws/"
+PROD_BASE_URL = "https://e-gov.betha.com.br/e-nota-contribuinte-ws/"
 servicos = {
     'envia_documento': ServicoNFSe(
         operacao='EnviarLoteRpsEnvio',
-        endpoint='recepcionarLoteRps?wsdl',
-        classe_retorno=nfse_v202,
-        assinar=True
-    ),
-    'consulta_recibo': ServicoNFSe(
-        operacao='ConsultarSituacaoLoteRpsEnvio',
-        endpoint='consultarSituacaoLoteRps?wsdl',
+        endpoint='recepcionarLoteRps',
         classe_retorno=nfse_v202,
         assinar=True
     ),
     'consultar_lote_rps': ServicoNFSe(
         operacao='ConsultarLoteRpsEnvio',
-        endpoint='consultarLoteRps?wsdl',
+        endpoint='consultarLoteRps',
         classe_retorno=nfse_v202,
         assinar=True),
     'cancela_documento': ServicoNFSe(
@@ -56,7 +52,7 @@ servicos = {
         assinar=True),
     'consulta_nfse_rps': ServicoNFSe(
         operacao='ConsultarNfsePorRpsEnvio',
-        endpoint='consultarNfsePorRps?wsdl',
+        endpoint='consultarNfsePorRps',
         classe_retorno=nfse_v202,
         assinar=True),
 }
@@ -72,11 +68,9 @@ class Betha(NFSe):
     def __init__(self, transmissao, ambiente, cidade_ibge, cnpj_prestador,
                  im_prestador):
         if ambiente == '2':
-            # HOMOLOGAÇÃO
-            self._url = 'http://e-gov.betha.com.br/e-nota-contribuinte-test-ws/'
+            self._url = HOMO_BASE_URL
         else:
-            # PRODUÇÃO
-            self._url = 'http://e-gov.betha.com.br/e-nota-contribuinte-ws/'
+            self._url = PROD_BASE_URL
         self._servicos = servicos
 
         super().__init__(
@@ -126,8 +120,7 @@ class Betha(NFSe):
         transport = DefaultTransport(session=self._transmissao.session)
         enviar_lote_response = transport.post(
             data=payload,
-            # TODO Buscar a URL com base no ambiente.
-            url="https://e-gov.betha.com.br/e-nota-contribuinte-test-ws/recepcionarLoteRps",
+            url=self._get_location(servico),
             headers=None
         )
         retorno = XmlParser().from_bytes(
@@ -151,15 +144,17 @@ class Betha(NFSe):
         """
         Consulta o lote de RPS utilizando a comunicação SOAP do XSDATA.
         """
-        servico = self._servicos[self.consulta_recibo.__name__]
+        servico = self._servicos[self.consultar_lote_rps.__name__]
 
         protocolo = proc_envio.resposta.protocolo
         consultar_lote_rps_envio = self._prepara_consultar_lote_rps(protocolo)
 
         xml_body = XmlSerializer().render(consultar_lote_rps_envio)
         client = Client.from_service(
-            consultar_lote_rps.ConsultarLoteRpsConsultarLoteRpsEnvio
+            consultar_lote_rps.ConsultarLoteRpsConsultarLoteRpsEnvio,
+            location=self._get_location(servico)
         )
+
         session = self._transmissao.session
         transport = DefaultTransport(session=session)
         client.transport = transport
@@ -195,7 +190,8 @@ class Betha(NFSe):
         """
         servico = self._servicos[self.cancela_documento.__name__]
         client = Client.from_service(
-            cancelar_nfse.CancelarNev01CancelarNfseEnvio
+            cancelar_nfse.CancelarNev01CancelarNfseEnvio,
+            location=self._get_location(servico)
         )
         session = self._transmissao.session
         transport = DefaultTransport(session=session)
@@ -281,12 +277,25 @@ class Betha(NFSe):
         """
         Consulta da NFS-e por RPS, utilizando a comunicação SOAP do XSDATA.
         """
+        rps_numero = kwargs.get('rps_number')
+        rps_serie = kwargs.get('rps_serie')
+        rps_tipo = kwargs.get('rps_type')
+
         servico = self._servicos[self.consulta_nfse_rps.__name__]
-        client = Client.from_service(ConsultarNeporRpsConsultarNfsePorRpsEnvio)
+        client = Client.from_service(
+            ConsultarNeporRpsConsultarNfsePorRpsEnvio,
+            location=self._get_location(servico)
+        )
+
         session = self._transmissao.session
         transport = DefaultTransport(session=session)
         client.transport = transport
-        consultar_nfse_por_rps_envio = self._prepara_consultar_nfse_rps(**kwargs)
+
+        consultar_nfse_por_rps_envio = self._prepara_consultar_nfse_rps(
+            rps_numero,
+            rps_serie,
+            rps_tipo,
+        )
         cconsultar_input = ConsultarNeporRpsConsultarNfsePorRpsEnvioInput(
             body=ConsultarNeporRpsConsultarNfsePorRpsEnvioInput.Body(
                 consultar_nfse_por_rps_envio
@@ -315,11 +324,7 @@ class Betha(NFSe):
             resposta=consultar_nfse_por_rps_reposta
         )
 
-    def _prepara_consultar_nfse_rps(self, **kwargs):
-        rps_numero = kwargs.get('rps_number')
-        rps_serie = kwargs.get('rps_serie')
-        rps_tipo = kwargs.get('rps_type')
-
+    def _prepara_consultar_nfse_rps(self, rps_numero, rps_serie, rps_tipo):
         raiz = ConsultarNfsePorRpsEnvio(
             identificacao_rps=TcIdentificacaoRps(
                 numero=rps_numero,
@@ -367,3 +372,9 @@ class Betha(NFSe):
             reference_uri=f"#{ref_id}" if ref_id else None
         )
         return root
+
+    def _get_location(self, servico):
+        """
+        Join webservice base URL with specific service.
+        """
+        return urljoin(self._url, servico.endpoint)
