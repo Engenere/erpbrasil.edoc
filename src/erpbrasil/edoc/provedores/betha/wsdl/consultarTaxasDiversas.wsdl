@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<definitions name='ConsultarTaxasDiversasService' targetNamespace='http://www.betha.com.br/e-nota-contribuinte-ws' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://www.betha.com.br/e-nota-contribuinte-ws' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+ <types>
+  <xs:schema targetNamespace='http://www.betha.com.br/e-nota-contribuinte-ws' version='1.0' xmlns:tns='http://www.betha.com.br/e-nota-contribuinte-ws' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+   <xs:element name='ConsultarTaxasDiversasEnvio' type='tns:ConsultarTaxasDiversasEnvio'/>
+   <xs:element name='ConsultarTaxasDiversasEnvioResponse' type='tns:ConsultarTaxasDiversasEnvioResponse'/>
+   <xs:complexType name='ConsultarTaxasDiversasEnvio'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='Prestador' type='tns:tcIdentificacaoPrestador'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='tcIdentificacaoPrestador'>
+    <xs:sequence>
+     <xs:element name='Cnpj' type='xs:string'/>
+     <xs:element minOccurs='0' name='InscricaoMunicipal' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='ConsultarTaxasDiversasEnvioResponse'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='ConsultarTaxasDiversasResposta' type='tns:consultarTaxasDiversasResposta'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='consultarTaxasDiversasResposta'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='ListaTaxaDiversaRetorno' type='tns:tcListaTaxaDiversaRetorno'/>
+     <xs:element minOccurs='0' name='ListaMensagemRetorno' type='tns:tcListaMensagemRetorno'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='tcListaTaxaDiversaRetorno'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' name='TaxaDiversaRetorno' type='tns:tcTaxaDiversaRetorno'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='tcTaxaDiversaRetorno'>
+    <xs:sequence>
+     <xs:element name='Codigo' type='xs:int'/>
+     <xs:element name='Descricao' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='tcListaMensagemRetorno'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' name='MensagemRetorno' type='tns:tcMensagemRetorno'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='tcMensagemRetorno'>
+    <xs:sequence>
+     <xs:element name='Codigo' type='xs:string'/>
+     <xs:element name='Mensagem' type='xs:string'/>
+     <xs:element minOccurs='0' name='Correcao' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+  </xs:schema>
+ </types>
+ <message name='ConsultarTaxasDiversas_ConsultarTaxasDiversasEnvioResponse'>
+  <part element='tns:ConsultarTaxasDiversasEnvioResponse' name='ConsultarTaxasDiversasEnvioResponse'></part>
+ </message>
+ <message name='ConsultarTaxasDiversas_ConsultarTaxasDiversasEnvio'>
+  <part element='tns:ConsultarTaxasDiversasEnvio' name='ConsultarTaxasDiversasEnvio'></part>
+ </message>
+ <portType name='ConsultarTaxasDiversas'>
+  <operation name='ConsultarTaxasDiversasEnvio' parameterOrder='ConsultarTaxasDiversasEnvio'>
+   <input message='tns:ConsultarTaxasDiversas_ConsultarTaxasDiversasEnvio'></input>
+   <output message='tns:ConsultarTaxasDiversas_ConsultarTaxasDiversasEnvioResponse'></output>
+  </operation>
+ </portType>
+ <binding name='ConsultarTaxasDiversasBinding' type='tns:ConsultarTaxasDiversas'>
+  <soap:binding style='document' transport='http://schemas.xmlsoap.org/soap/http'/>
+  <operation name='ConsultarTaxasDiversasEnvio'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+ </binding>
+ <service name='ConsultarTaxasDiversasService'>
+  <port binding='tns:ConsultarTaxasDiversasBinding' name='ConsultarTaxasDiversasPort'>
+   <soap:address location='http://e-gov.betha.com.br/e-nota-contribuinte-test-ws/consultarTaxasDiversas'/>
+  </port>
+ </service>
+</definitions>
