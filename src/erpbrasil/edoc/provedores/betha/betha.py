@@ -131,6 +131,8 @@ class Betha(NFSe):
         # Extrai apenas a parte relevante do envelope SOAP.
         if retorno.body.enviar_lote_rps_envio_response:
             resposta = retorno.body.enviar_lote_rps_envio_response.enviar_lote_rps_resposta
+        else:
+            resposta = None
 
         return RetornoSoap(
             webservice=servico.operacao,
