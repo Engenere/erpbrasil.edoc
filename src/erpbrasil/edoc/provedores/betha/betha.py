@@ -115,7 +115,7 @@ class Betha(NFSe):
             rps_tag.extend(rps_signed_root)
         payload = etree.tostring(
             enviar_lote_soap_root, encoding='utf-8'
-        ).decode('utf-8')
+        )
 
         transport = DefaultTransport(session=self._transmissao.session)
         enviar_lote_response = transport.post(

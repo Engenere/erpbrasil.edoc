@@ -125,7 +125,7 @@ class BethaTests(TestCase):
                                     ),
                                     ItemListaServico='0101',
                                     CodigoCnae=6202300,
-                                    Discriminacao='[ODOO_DEV] Customized Odoo Development',
+                                    Discriminacao='[ODOO_DEV] Código de Ativação Técnico',  # importante testar com os acentos
                                     CodigoMunicipio=4216305,
                                 ),
                                 Prestador=TcIdentificacaoPrestador(
