@@ -751,8 +751,11 @@ class NFe(DocumentoEletronico):
     _namespace = "http://www.portalfiscal.inf.br/nfe"
     _edoc_situacao_arquivo_recebido_com_sucesso = "103"
     _edoc_situacao_servico_em_operacao = "107"
+
+    # Desativado por padrão para evitar 'consumo indevido'
     _consulta_servico_ao_enviar = False
     _consulta_documento_antes_de_enviar = False
+
     _maximo_tentativas_consulta_recibo = 5
 
     def __init__(
