@@ -165,8 +165,8 @@ class Issnet(NFSe):
         xml_assinado = (
             '<?xml version="1.0"?>'
             "<p1:CancelarNfseEnvio "
-            'xmlns:p1="http://www.issnetonline.com.br/webserviceabrasf/vsd/servico_cancelar_nfse_envio.xsd" '  # noqa: E501
-            'xmlns:tc="http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd" '  # noqa: E501
+            'xmlns:p1="http://www.issnetonline.com.br/webserviceabrasf/vsd/servico_cancelar_nfse_envio.xsd" '
+            'xmlns:tc="http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd" '
             'xmlns:ts="http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_simples.xsd">'
             + pedido
             + "</p1:CancelarNfseEnvio>"

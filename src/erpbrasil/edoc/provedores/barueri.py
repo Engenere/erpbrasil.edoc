@@ -2,8 +2,9 @@
 
 
 import xml.etree.ElementTree as ET
-from lxml import etree
 from datetime import datetime
+
+from lxml import etree
 
 from erpbrasil.base import misc
 from erpbrasil.edoc.nfse import NFSe, ServicoNFSe
@@ -67,12 +68,14 @@ class Barueri(NFSe):
     def _prepara_envia_documento(self, edoc):
         numero_lote = self._gera_numero_lote()
         xml_string, xml_etree = self._generateds_to_string_etree(edoc)
-        root = etree.Element("NFeLoteEnviarArquivo", xmlns="http://www.barueri.sp.gov.br/nfe")
+        root = etree.Element(
+            "NFeLoteEnviarArquivo", xmlns="http://www.barueri.sp.gov.br/nfe"
+        )
         versao_schema = etree.SubElement(root, "VersaoSchema")
         versao_schema.text = "1"
         mensagem_xml = etree.SubElement(root, "MensagemXML")
         mensagem_xml.text = etree.CDATA(xml_string)
-        edoc.ApenasValidaArq = 'lote' + numero_lote
+        edoc.ApenasValidaArq = "lote" + numero_lote
         return root
 
     def _prepara_consulta_recibo(self, proc_envio):
